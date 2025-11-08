@@ -21,7 +21,9 @@ const AuthPage = () => {
     e.preventDefault();
     setError(''); // Clear previous errors
 
-    const url = isLogin ? '/api/auth/login' : '/api/auth/signup';
+    const RENDER_URL = "https://socialisein-backend-ljk10.onrender.com"; // 👈 PASTE YOUR RENDER URL HERE
+
+const url = isLogin ? `${RENDER_URL}/api/auth/login` : `${RENDER_URL}/api/auth/signup`;
     const payload = isLogin ? { email, password } : { name, email, password };
 
     try {

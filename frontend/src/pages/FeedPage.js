@@ -6,10 +6,14 @@ const FeedPage = () => {
   const [text, setText] = useState('');
   const [error, setError] = useState('');
 
+  // Your live backend URL
+  const RENDER_URL = "https://socialisein-backend-ljk10.onrender.com";
+
   // --- 1. Function to fetch all posts ---
   const fetchPosts = async () => {
     try {
-      const res = await axios.get('/api/posts'); // Proxy handles the full URL
+      // Use the full Render URL
+      const res = await axios.get(`${RENDER_URL}/api/posts`); 
       setPosts(res.data);
     } catch (err) {
       console.error('Error fetching posts:', err);
@@ -40,8 +44,8 @@ const FeedPage = () => {
         },
       };
 
-      // Send the post text AND the auth config
-      const res = await axios.post('/api/posts', { text }, config);
+      // Send the post text AND the auth config, using the full Render URL
+      const res = await axios.post(`${RENDER_URL}/api/posts`, { text }, config);
 
       // Add the new post to the top of the list (using the response)
       setPosts([res.data, ...posts]);
