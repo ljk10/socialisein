@@ -1,0 +1,88 @@
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const FeedPage = () => {
+  const [posts, setPosts] = useState([]);
+  const [text, setText] = useState('');
+  const [error, setError] = useState('');
+
+  // --- 1. Function to fetch all posts ---
+  const fetchPosts = async () => {
+    try {
+      const res = await axios.get('/api/posts'); // Proxy handles the full URL
+      setPosts(res.data);
+    } catch (err) {
+      console.error('Error fetching posts:', err);
+    }
+  };
+
+  // --- 2. useEffect to fetch posts ONCE on page load ---
+  useEffect(() => {
+    fetchPosts();
+  }, []); // The empty array [] means this runs only once on mount
+
+  // --- 3. Function to handle creating a new post ---
+  const handlePostSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    if (!text.trim()) {
+      setError('Post cannot be empty');
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      // We must send the token in the headers
+      const config = {
+        headers: {
+          'x-auth-token': token,
+        },
+      };
+
+      // Send the post text AND the auth config
+      const res = await axios.post('/api/posts', { text }, config);
+
+      // Add the new post to the top of the list (using the response)
+      setPosts([res.data, ...posts]);
+      setText(''); // Clear the textarea
+    } catch (err) {
+      setError(err.response?.data?.msg || 'Could not create post');
+    }
+  };
+
+  return (
+    <>
+      {/* --- CREATE POST FORM --- */}
+      <div className="post-form-container">
+        <form className="post-form" onSubmit={handlePostSubmit}>
+          <textarea
+            placeholder="Start a post"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+          ></textarea>
+          {error && <p style={{ color: 'red' }}>{error}</p>}
+          <button type="submit">Post</button>
+        </form>
+      </div>
+
+      {/* --- POSTS FEED --- */}
+      <div className="feed-container">
+        {posts.map((post) => (
+          <div key={post._id} className="post-item">
+            <div className="post-header">
+              {/* The backend populated 'user.name' for us! */}
+              <h3>{post.user?.name || 'User'}</h3> 
+              <span>{new Date(post.createdAt).toLocaleString()}</span>
+            </div>
+            <div className="post-body">
+              <p>{post.text}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </>
+  );
+};
+
+export default FeedPage;
