@@ -3,7 +3,8 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import AuthPage from './pages/AuthPage';
 import FeedPage from './pages/FeedPage';
-import ProfilePage from './pages/ProfilePage'; // 👈 ADD THIS IMPORT
+import ProfilePage from './pages/ProfilePage';
+import { useTheme } from './hooks/useTheme'; // 👈 Import the hook
 
 // This simple check is our "authentication"
 // A real app would use React Context for this
@@ -22,17 +23,14 @@ const AuthRoute = ({ element }) => {
 };
 
 function App() {
+  const { theme, toggleTheme } = useTheme(); // 👈 Use the hook
+
   return (
     <>
-      <Navbar />
+      {/* 👇 Pass the function and theme to the Navbar 👇 */}
+      <Navbar toggleTheme={toggleTheme} theme={theme} />
       <div className="container">
         <Routes>
-          {/* 👇 ADD THIS NEW ROUTE 👇 */}
-          <Route 
-            path="/profile/:userId" 
-            element={<ProtectedRoute element={<ProfilePage />} />} 
-          />
-          <Route path="*" element={<Navigate to="/" />} />
           <Route 
             path="/" 
             element={<ProtectedRoute element={<FeedPage />} />} 
@@ -41,7 +39,10 @@ function App() {
             path="/auth" 
             element={<AuthRoute element={<AuthPage />} />} 
           />
-          {/* Any other path redirects to home */}
+          <Route 
+            path="/profile/:userId" 
+            element={<ProtectedRoute element={<ProfilePage />} />} 
+          />
           <Route path="*" element={<Navigate to="/" />} />
         </Routes>
       </div>

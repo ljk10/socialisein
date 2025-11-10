@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 
-const Navbar = () => {
+// Get 'toggleTheme' and 'theme' as props
+const Navbar = ({ toggleTheme, theme }) => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
   const myId = localStorage.getItem('userId'); // Get our own ID
@@ -12,10 +13,11 @@ const Navbar = () => {
 
   const RENDER_URL = "https://socialisein-backend-ljk10.onrender.com";
 
+  // This useEffect runs when the 'search' state changes
   useEffect(() => {
     const fetchUsers = async () => {
       if (search.trim() === '') {
-        setSearchResults([]);
+        setSearchResults([]); // Clear results if search is empty
         return;
       }
       try {
@@ -26,12 +28,13 @@ const Navbar = () => {
       }
     };
 
+    // "Debounce" the search: wait 300ms after user stops typing
     const delayDebounce = setTimeout(() => {
       fetchUsers();
     }, 300);
 
-    return () => clearTimeout(delayDebounce);
-  }, [search]);
+    return () => clearTimeout(delayDebounce); // Cleanup
+  }, [search]); // Re-run whenever 'search' changes
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -47,7 +50,7 @@ const Navbar = () => {
   return (
     <nav className="navbar">
       <Link to="/" className="navbar-brand" onClick={clearSearch}>
-        SimpleLinkedIn
+        SocialiseIn
       </Link>
 
       {/* --- Search Bar with Dropdown --- */}
@@ -74,13 +77,20 @@ const Navbar = () => {
         </div>
       )}
       
-      {/* --- My Profile Link (Text) --- */}
+      {/* --- My Profile Link --- */}
       {token && myId && (
-         <Link to={`/profile/${myId}`} style={{ margin: '0 15px', fontWeight: '600', color: '#0a66c2', textDecoration: 'none' }}>
+         <Link to={`/profile/${myId}`} style={{ margin: '0 15px', fontWeight: '600', color: 'var(--color-accent)', textDecoration: 'none' }}>
           My Profile
         </Link>
       )}
       
+      {/* --- Theme Toggle Button --- */}
+      {token && (
+        <button onClick={toggleTheme} className="theme-toggle-btn">
+          {theme === 'light' ? '🌙 Dark' : '☀️ Light'}
+        </button>
+      )}
+
       {/* --- Logout Button --- */}
       {token && (
         <button onClick={handleLogout}>
