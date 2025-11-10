@@ -14,6 +14,9 @@ const AuthPage = () => {
 
   const { name, email, password } = formData;
 
+  // Your live backend URL
+  const RENDER_URL = "https://socialisein-backend-ljk10.onrender.com";
+
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
@@ -21,29 +24,35 @@ const AuthPage = () => {
     e.preventDefault();
     setError(''); // Clear previous errors
 
-    const RENDER_URL = "https://socialisein-backend-ljk10.onrender.com"; // 👈 PASTE YOUR RENDER URL HERE
+    // Use the full Render URL
+    const url = isLogin
+      ? `${RENDER_URL}/api/auth/login`
+      : `${RENDER_URL}/api/auth/signup`;
 
-const url = isLogin ? `${RENDER_URL}/api/auth/login` : `${RENDER_URL}/api/auth/signup`;
     const payload = isLogin ? { email, password } : { name, email, password };
 
     try {
-      // Because of the "proxy" in package.json, this '/api/...'
-      // will correctly go to "http://localhost:5000/api/..."
+      // ... in onSubmit function, inside the 'try' block
       const res = await axios.post(url, payload);
-      
+
       localStorage.setItem('token', res.data.token);
       
-      // Navigate to the home page (feed)
+      if (res.data.userId) {
+        localStorage.setItem('userId', res.data.userId);
+      }
+      
       navigate('/');
-
+// ...
     } catch (err) {
       // Set error message from backend response
-      setError(err.response?.data?.msg || 'An error occurred. Please try again.');
+      setError(
+        err.response?.data?.msg || 'An error occurred. Please try again.'
+      );
     }
   };
 
   return (
-    <div className="auth-container">
+    <div className="auth-container fade-in">
       <form className="auth-form" onSubmit={onSubmit}>
         <h2>{isLogin ? 'Login' : 'Sign Up'}</h2>
         {!isLogin && (

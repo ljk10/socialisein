@@ -46,5 +46,32 @@ router.post('/', auth, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+// ... (at the end of the file, before module.exports)
+
+// --- GET POSTS BY USER ID ---
+// @route   GET /api/posts/user/:userId
+// @desc    Get all posts from a specific user
+// @access  Public
+router.get('/user/:userId', async (req, res) => {
+  try {
+    const posts = await Post.find({ user: req.params.userId })
+      .populate('user', ['name'])
+      .sort({ createdAt: -1 });
+    
+    if (!posts) {
+      return res.status(404).json({ msg: 'No posts found for this user' });
+    }
+
+    res.json(posts);
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'User not found' });
+    }
+    res.status(500).send('Server error');
+  }
+});
+
+module.exports = router;
 
 module.exports = router;

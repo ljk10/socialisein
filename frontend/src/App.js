@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import AuthPage from './pages/AuthPage';
 import FeedPage from './pages/FeedPage';
+import ProfilePage from './pages/ProfilePage'; // 👈 ADD THIS IMPORT
 
 // This simple check is our "authentication"
 // A real app would use React Context for this
@@ -26,6 +27,12 @@ function App() {
       <Navbar />
       <div className="container">
         <Routes>
+          {/* 👇 ADD THIS NEW ROUTE 👇 */}
+          <Route 
+            path="/profile/:userId" 
+            element={<ProtectedRoute element={<ProfilePage />} />} 
+          />
+          <Route path="*" element={<Navigate to="/" />} />
           <Route 
             path="/" 
             element={<ProtectedRoute element={<FeedPage />} />} 

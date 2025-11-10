@@ -1,16 +1,23 @@
+/* --- Universal Box-Sizing & Reset --- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box; /* This is the main fix */
+}
+
 /* Basic Reset */
-body, h1, h2, p, button, input, textarea {
+body, h1, h2, p, button, input, textarea, ul, li, a, nav {
   margin: 0;
   padding: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
-  box-sizing: border-box;
 }
 
 body {
   background-color: #f3f2ef;
   color: #333;
+  overflow-x: hidden; /* This is a safeguard to prevent horizontal scroll */
 }
 
 .container {
@@ -168,4 +175,56 @@ body {
   font-size: 16px;
   line-height: 1.5;
   white-space: pre-wrap; /* Preserves line breaks */
+}
+/* --- Search Bar --- */
+.search-container {
+  position: relative;
+}
+
+.search-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  z-index: 100;
+}
+
+.search-dropdown li a {
+  display: block;
+  padding: 12px 15px;
+  text-decoration: none;
+  color: #333;
+}
+
+.search-dropdown li a:hover {
+  background-color: #f3f2ef;
+}
+
+/* --- Navbar Links --- */
+.navbar-brand, .navbar a {
+  text-decoration: none;
+  color: inherit;
+}
+/* --- Animations --- */
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

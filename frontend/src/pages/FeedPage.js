@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { Link } from 'react-router-dom'; // Make sure Link is imported
 
 const FeedPage = () => {
   const [posts, setPosts] = useState([]);
@@ -13,7 +14,7 @@ const FeedPage = () => {
   const fetchPosts = async () => {
     try {
       // Use the full Render URL
-      const res = await axios.get(`${RENDER_URL}/api/posts`); 
+      const res = await axios.get(`${RENDER_URL}/api/posts`);
       setPosts(res.data);
     } catch (err) {
       console.error('Error fetching posts:', err);
@@ -58,7 +59,7 @@ const FeedPage = () => {
   return (
     <>
       {/* --- CREATE POST FORM --- */}
-      <div className="post-form-container">
+      <div className="post-form-container fade-in">
         <form className="post-form" onSubmit={handlePostSubmit}>
           <textarea
             placeholder="Start a post"
@@ -71,12 +72,14 @@ const FeedPage = () => {
       </div>
 
       {/* --- POSTS FEED --- */}
-      <div className="feed-container">
+      <div className="feed-container fade-in">
         {posts.map((post) => (
           <div key={post._id} className="post-item">
             <div className="post-header">
-              {/* The backend populated 'user.name' for us! */}
-              <h3>{post.user?.name || 'User'}</h3> 
+              {/* This is the simplified header */}
+              <Link to={`/profile/${post.user?._id}`}>
+                <h3>{post.user?.name || 'User'}</h3>
+              </Link>
               <span>{new Date(post.createdAt).toLocaleString()}</span>
             </div>
             <div className="post-body">
