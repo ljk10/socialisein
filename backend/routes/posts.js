@@ -3,6 +3,7 @@ const router = express.Router();
 const auth = require('../middleware/auth'); // Import our auth middleware
 const Post = require('../models/Post');
 const User = require('../models/User');
+const auth = require('../middleware/auth');
 
 // --- GET ALL POSTS ROUTE ---
 // @route   GET /api/posts
@@ -72,6 +73,36 @@ router.get('/user/:userId', async (req, res) => {
   }
 });
 
-module.exports = router;
+// --- DELETE A POST ---
+// @route   DELETE /api/posts/:id
+// @desc    Delete a post
+// @access  Private
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.id);
+
+    // Check if post exists
+    if (!post) {
+      return res.status(404).json({ msg: 'Post not found' });
+    }
+
+    // **Check if user owns the post**
+    // We use .toString() to match the 'user' (ObjectId) with the 'req.user.id' (String)
+    if (post.user.toString() !== req.user.id) {
+      return res.status(401).json({ msg: 'User not authorized' });
+    }
+
+    // Use remove() or deleteOne()
+    await post.remove();
+
+    res.json({ msg: 'Post removed' });
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ msg: 'Post not found' });
+    }
+    res.status(500).send('Server error');
+  }
+});
 
 module.exports = router;

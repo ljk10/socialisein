@@ -1,19 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom'; // Make sure Link is imported
+import { Link } from 'react-router-dom';
 
 const FeedPage = () => {
   const [posts, setPosts] = useState([]);
   const [text, setText] = useState('');
-  const [error, setError] = useState('');
+  const [error, setError] = useState(''); // 'error' is now used in the JSX
 
   // Your live backend URL
   const RENDER_URL = "https://socialisein-backend-ljk10.onrender.com";
+  // Get the logged-in user's ID
+  const myId = localStorage.getItem('userId');
 
   // --- 1. Function to fetch all posts ---
   const fetchPosts = async () => {
     try {
-      // Use the full Render URL
       const res = await axios.get(`${RENDER_URL}/api/posts`);
       setPosts(res.data);
     } catch (err) {
@@ -21,38 +22,42 @@ const FeedPage = () => {
     }
   };
 
-  // --- 2. useEffect to fetch posts ONCE on page load ---
   useEffect(() => {
     fetchPosts();
-  }, []); // The empty array [] means this runs only once on mount
+  }, []);
 
-  // --- 3. Function to handle creating a new post ---
-  const handlePostSubmit = async (e) => {
+  // --- 2. Function to handle creating a new post ---
+  const handlePostSubmit = async (e) => { // 'handlePostSubmit' is now used in the JSX
     e.preventDefault();
     setError('');
-
     if (!text.trim()) {
       setError('Post cannot be empty');
       return;
     }
-
     try {
       const token = localStorage.getItem('token');
-      // We must send the token in the headers
-      const config = {
-        headers: {
-          'x-auth-token': token,
-        },
-      };
-
-      // Send the post text AND the auth config, using the full Render URL
+      const config = { headers: { 'x-auth-token': token } };
       const res = await axios.post(`${RENDER_URL}/api/posts`, { text }, config);
-
-      // Add the new post to the top of the list (using the response)
       setPosts([res.data, ...posts]);
-      setText(''); // Clear the textarea
+      setText('');
     } catch (err) {
       setError(err.response?.data?.msg || 'Could not create post');
+    }
+  };
+
+  // --- 3. Function to handle deleting a post ---
+  const handleDelete = async (postId) => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      try {
+        const token = localStorage.getItem('token');
+        const config = { headers: { 'x-auth-token': token } };
+        
+        await axios.delete(`${RENDER_URL}/api/posts/${postId}`, config);
+        
+        setPosts(posts.filter((post) => post._id !== postId));
+      } catch (err) {
+        console.error('Error deleting post:', err);
+      }
     }
   };
 
@@ -60,6 +65,7 @@ const FeedPage = () => {
     <>
       {/* --- CREATE POST FORM --- */}
       <div className="post-form-container fade-in">
+        {/* 👇 THE FIX IS HERE 👇 */}
         <form className="post-form" onSubmit={handlePostSubmit}>
           <textarea
             placeholder="Start a post"
@@ -76,7 +82,6 @@ const FeedPage = () => {
         {posts.map((post) => (
           <div key={post._id} className="post-item">
             <div className="post-header">
-              {/* This is the simplified header */}
               <Link to={`/profile/${post.user?._id}`}>
                 <h3>{post.user?.name || 'User'}</h3>
               </Link>
@@ -85,6 +90,15 @@ const FeedPage = () => {
             <div className="post-body">
               <p>{post.text}</p>
             </div>
+            
+            {post.user?._id === myId && (
+              <button 
+                className="delete-post-btn"
+                onClick={() => handleDelete(post._id)}
+              >
+                Delete
+              </button>
+            )}
           </div>
         ))}
       </div>

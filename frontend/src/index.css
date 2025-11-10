@@ -228,3 +228,20 @@ body {
     transform: translateY(0);
   }
 }
+.delete-post-btn {
+  background: none;
+  border: 1px solid #d9534f;
+  color: #d9534f;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 10px;
+  transition: all 0.2s;
+}
+
+.delete-post-btn:hover {
+  background: #d9534f;
+  color: #fff;
+}

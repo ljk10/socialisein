@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useParams, Link } from 'react-router-dom'; // 👈 THE FIX IS HERE
+import { useParams, Link } from 'react-router-dom';
 
 const ProfilePage = () => {
   const [user, setUser] = useState(null);
   const [posts, setPosts] = useState([]);
   const { userId } = useParams();
 
-  // Editing state
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false); // 'isEditing' is now used
   const [editName, setEditName] = useState('');
   const [editBio, setEditBio] = useState('');
   const [editHeadline, setEditHeadline] = useState('');
@@ -17,12 +16,14 @@ const ProfilePage = () => {
   const loggedInUserId = localStorage.getItem('userId');
   const isMyProfile = userId === loggedInUserId;
 
+  // --- Fetch User Data Function ---
   useEffect(() => {
+    // 👇 THE USEEFFECT FIX IS HERE 👇
+    // Move the function inside the hook to fix the dependency warning
     const fetchUserData = async () => {
       try {
         const userRes = await axios.get(`${RENDER_URL}/api/users/${userId}`);
         setUser(userRes.data);
-        // Set edit fields
         setEditName(userRes.data.name);
         setEditBio(userRes.data.bio || '');
         setEditHeadline(userRes.data.headline || '');
@@ -35,10 +36,10 @@ const ProfilePage = () => {
     };
 
     fetchUserData();
-  }, [userId]);
+  }, [userId]); // Now the dependency array is correct
 
-  // For text fields (name, bio, headline)
-  const handleEditSubmit = async (e) => {
+  // --- Handle Edit Submit Function ---
+  const handleEditSubmit = async (e) => { // 'handleEditSubmit' is now used
     e.preventDefault();
     const config = { headers: { 'x-auth-token': localStorage.getItem('token') } };
     const body = { name: editName, bio: editBio, headline: editHeadline };
@@ -51,6 +52,22 @@ const ProfilePage = () => {
     }
   };
 
+  // --- Handle Delete Function ---
+  const handleDelete = async (postId) => {
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      try {
+        const token = localStorage.getItem('token');
+        const config = { headers: { 'x-auth-token': token } };
+        
+        await axios.delete(`${RENDER_URL}/api/posts/${postId}`, config);
+        
+        setPosts(posts.filter((post) => post._id !== postId));
+      } catch (err) {
+        console.error('Error deleting post:', err);
+      }
+    }
+  };
+
   if (!user) return <div>Loading...</div>;
 
   return (
@@ -58,7 +75,7 @@ const ProfilePage = () => {
       {/* --- USER HEADER --- */}
       <div className="profile-header fade-in" style={{ background: '#fff', padding: '20px', borderRadius: '8px', marginBottom: '20px', position: 'relative' }}>
         
-        {/* --- View Mode --- */}
+        {/* --- View Mode (uses 'isEditing') --- */}
         {!isEditing && (
           <>
             <h1>{user.name}</h1>
@@ -73,7 +90,7 @@ const ProfilePage = () => {
           </>
         )}
 
-        {/* --- Edit Mode --- */}
+        {/* --- Edit Mode (uses 'isEditing' and 'handleEditSubmit') --- */}
         {isEditing && isMyProfile && (
           <form onSubmit={handleEditSubmit}>
             <h2>Edit Profile</h2>
@@ -109,6 +126,15 @@ const ProfilePage = () => {
               <div className="post-body">
                 <p>{post.text}</p>
               </div>
+
+              {isMyProfile && (
+                <button 
+                  className="delete-post-btn"
+                  onClick={() => handleDelete(post._id)}
+                >
+                  Delete
+                </button>
+              )}
             </div>
           ))
         ) : (
